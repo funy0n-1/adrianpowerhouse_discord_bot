@@ -21,5 +21,3 @@ try:
     bot.run(os.environ.get('powerbot_key'))
 except:
     print('unable to connect')
-
-    test
