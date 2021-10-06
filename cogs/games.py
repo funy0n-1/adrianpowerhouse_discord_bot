@@ -61,7 +61,6 @@ class games(commands.Cog):
                 await person.send('type r for rock \n type p for paper \n type s for scissors')
         else:
             await ctx.send('there must be 2 players in game to start')
-        
 
 
 def setup(bot):
