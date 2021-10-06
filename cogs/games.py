@@ -35,6 +35,9 @@ class games(commands.Cog):
         else:
             await ctx.send('there needs to be at least 2 players in game')
 
+    @commands.command()
+    async def sticks(self, ctx, player):
+        print(ctx.message.author.mention + " has started a game of sticks \n type 'join' to play against them")
 
 
 def setup(bot):
