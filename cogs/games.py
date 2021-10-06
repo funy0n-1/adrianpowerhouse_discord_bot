@@ -36,24 +36,29 @@ class games(commands.Cog):
             await ctx.send('there needs to be at least 2 players in game')
 
     @commands.command()
-    async def rps(self, ctx, player):
+    async def rps(self, ctx):
         players = []
+        players.append(ctx.message.author.id)
         timeout = 15
         time_stop = time.time() + timeout
         def check(msg):
             return str(msg.content).startswith('join')
-        print(ctx.message.author.mention + " has started a game of rock, paper, scissors \n type 'join' to play against them")
+        await ctx.send(ctx.message.author.mention + " has started a game of rock paper scissors \n type 'join' to play against them")
         while time.time() < time_stop:
-            message = await self.bot.wait_for('message', timeout=5, check=check)
+            message = False
+            try:
+                message = await self.bot.wait_for('message', timeout=5, check=check)
+            except:
+                pass
             if message:
-                if message.author.id not in players:
+                if message.author.id not in players and len(players) < 2:
                     players.append(message.author.id)
                 else:
-                    await ctx.send(message.author.mention + " is already in game.")
-        if 2 > len(players) > 1:
+                    await ctx.send(message.author.mention + " is already in game or game is full.")
+        if len(players) > 1:
             for i in players:
                 person = self.bot.get_user(i)
-                person.send('type r for rock \n type p for paper \n type s for scissors')
+                await person.send('type r for rock \n type p for paper \n type s for scissors')
         else:
             await ctx.send('there must be 2 players in game to start')
         
