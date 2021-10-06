@@ -36,8 +36,27 @@ class games(commands.Cog):
             await ctx.send('there needs to be at least 2 players in game')
 
     @commands.command()
-    async def sticks(self, ctx, player):
-        print(ctx.message.author.mention + " has started a game of sticks \n type 'join' to play against them")
+    async def rps(self, ctx, player):
+        players = []
+        timeout = 15
+        time_stop = time.time() + timeout
+        def check(msg):
+            return str(msg.content).startswith('join')
+        print(ctx.message.author.mention + " has started a game of rock, paper, scissors \n type 'join' to play against them")
+        while time.time() < time_stop:
+            message = await self.bot.wait_for('message', timeout=5, check=check)
+            if message:
+                if message.author.id not in players:
+                    players.append(message.author.id)
+                else:
+                    await ctx.send(message.author.mention + " is already in game.")
+        if 2 > len(players) > 1:
+            for i in players:
+                person = self.bot.get_user(i)
+                person.send('type r for rock \n type p for paper \n type s for scissors')
+        else:
+            await ctx.send('there must be 2 players in game to start')
+        
 
 
 def setup(bot):
