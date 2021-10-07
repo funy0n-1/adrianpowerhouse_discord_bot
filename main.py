@@ -2,6 +2,8 @@ from discord.ext import commands, tasks
 import discord
 import os
 import psycopg2
+import urllib
+import base64
 
 db_pass = os.environ.get('powerbot_db_pass')
 
@@ -19,7 +21,6 @@ except:
 
 @bot.event
 async def on_ready():
-    # printing ready once bot has established connection with discord servers
     print('########################### adrianpowerbot ready')
 
 bot.load_extension('cogs.misc')
