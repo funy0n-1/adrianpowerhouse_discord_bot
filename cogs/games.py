@@ -56,9 +56,21 @@ class games(commands.Cog):
                 else:
                     await ctx.send(message.author.mention + " is already in game or game is full.")
         if len(players) > 1:
-            for i in players:
-                person = self.bot.get_user(i)
-                await person.send('type r for rock \n type p for paper \n type s for scissors')
+            player1 = self.bot.get_user(players[0])
+            player2 = self.bot.get_user(players[1])
+            def rps(msg, member):
+                if str(msg.content).startswith('r') or str(msg.content).startswith('p') or str(msg.content).startswith('s') and msg.author == member:
+                    return True
+                else:
+                    return False
+            await player1.send('type \n R for rock, \n P for paper, \n S for scissors \n you have 15 seconds to respond.')
+            await player2.send(f"awaiting {player2.name}'s response.")
+            try:
+                message = self.bot.wait_for('message', timeout=15, check=rps(player1))
+            except:
+                await player2.send(f'{player1.name} did not respond \n game cancelled')
+
+
         else:
             await ctx.send('there must be 2 players in game to start')
 

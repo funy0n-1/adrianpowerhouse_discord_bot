@@ -29,10 +29,6 @@ async def on_ready():
         if data['exists'] == False:
             cursor.execute('INSERT INTO servers (guild_id) VALUES (%s)', (i.id,))
             bot.database.commit()
-            for user in i.members:
-                if user.id != bot.user.id:
-                    cursor.execute('INSERT INTO users (member_id, guild_id) VALUES (%s,%s)', (user.id, i.id))
-                    bot.database.commit()
     cursor.close()
     print('########################### adrianpowerbot ready')
 
