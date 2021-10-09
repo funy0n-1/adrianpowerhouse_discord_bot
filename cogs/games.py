@@ -1,4 +1,5 @@
 from discord.ext import commands
+import discord
 import time, random
 
 class games(commands.Cog):
@@ -37,12 +38,14 @@ class games(commands.Cog):
 
     @commands.command()
     async def rps(self, ctx):
+        response1 = False
+        response2 = False
         players = []
         players.append(ctx.message.author.id)
         timeout = 15
         time_stop = time.time() + timeout
         def check(msg):
-            return str(msg.content).startswith('join')
+            return str(msg.content).lower().startswith('join')
         await ctx.send(ctx.message.author.mention + " has started a game of rock paper scissors \n type 'join' to play against them")
         while time.time() < time_stop:
             message = False
@@ -55,25 +58,90 @@ class games(commands.Cog):
                     players.append(message.author.id)
                 else:
                     await ctx.send(message.author.mention + " is already in game or game is full.")
+            if len(players) > 1:
+                break
         if len(players) > 1:
             player1 = self.bot.get_user(players[0])
             player2 = self.bot.get_user(players[1])
-            def rps(msg, member):
-                if str(msg.content).startswith('r') or str(msg.content).startswith('p') or str(msg.content).startswith('s') and msg.author == member:
+            async def private_channel(user):
+                overwrites = {
+                ctx.guild.default_role: discord.PermissionOverwrite(read_messages=False),
+                user: discord.PermissionOverwrite(read_messages=True),
+                }
+                channel = await ctx.guild.create_text_channel(user.name, overwrites=overwrites)
+                return channel
+            
+            player1_channel = await private_channel(player1)
+            player2_channel = await private_channel(player2)
+
+            def rps1(msg):
+                if str(msg.content).startswith('r') or str(msg.content).startswith('p') or str(msg.content).startswith('s') and msg.channel == player1_channel and msg.author == player1:
                     return True
                 else:
                     return False
-            await player1.send('type \n R for rock, \n P for paper, \n S for scissors \n you have 15 seconds to respond.')
-            await player2.send(f"awaiting {player2.name}'s response.")
-            try:
-                message = self.bot.wait_for('message', timeout=15, check=rps(player1))
-            except:
-                await player2.send(f'{player1.name} did not respond \n game cancelled')
 
+            def rps2(msg):
+                if str(msg.content).startswith('r') or str(msg.content).startswith('p') or str(msg.content).startswith('s') and msg.channel == player2_channel and msg.author == player2:
+                    return True
+                else:
+                    return False
+
+            await player1_channel.send(f'{player1.mention} \n type \n R for rock, \n P for paper, \n S for scissors \n you have 15 seconds to respond.')
+            await player2_channel.send(f"{player2.mention} \n awaiting {player1.name}'s response.")
+            try:
+                response1 = await self.bot.wait_for('message', timeout=15, check=rps1)
+            except:
+                await player1_channel.send(f'{player1.mention} 15 seconds over \n game cancelled')
+                await player2_channel.send(f'{player2.mention} \n {player1.name} did not respond in time \n the game has been cancelled')
+            if response1 != False:
+                print('AAAAAAAAAAAAAAAAAAHHHHHHHHHHHHHHHHHHHHHHHHHHH###########################')
+                await player2_channel.send(f"{player2.mention} \n {player1.name} has entered their response \n type \n R for rock, \n P for paper, \n S for scissors \n you have 15 seconds to respond.")
+                try:
+                    response2 = await self.bot.wait_for('message', timeout=15, check=rps2())
+                except:
+                    await player2_channel.send(f'{player2.mention} 15 seconds over \n game cancelled')
+                    await player1_channel.send(f'{player1.mention} \n {player2.name} did not respond in time \n the game has been cancelled')
+            if response2:
+                def win_check(r1, r2):
+                    if r1 == r2:
+                        return False
+                    elif r1 == 'r':
+                        if r2 == 'scissors':
+                            return r1
+                        else:
+                            return r2
+                    elif r1 == 'p':
+                        if r2 == 'r':
+                            return r1
+                        else:
+                            return r2
+                    elif r1 == 's':
+                        if r2 == 'p':
+                            return r1
+                        else:
+                            return r2
+
+                win_res = win_check(response1, response2)
+                if win_res:
+                    if win_res == response1:
+                        await player1_channel.send(f"{player1.mention} \n You win!")
+                        await player2_channel.send(f"{player2.mention} \n You lost loser!")
+                        pass
+                    else:
+                        await player2_channel.send(f"{player2.mention} \n You win!")
+                        await player1_channel.send(f"{player1.mention} \n You lost loser!")
+
+                else:
+                    await player1_channel.send("it's a draw!")
+                    await player2_channel.send("it's a draw!")
+            del_time = time.time() + 25
+            while(time.time() < del_time):
+                pass
+            await player1_channel.delete()
+            await player2_channel.delete()
 
         else:
             await ctx.send('there must be 2 players in game to start')
-
 
 def setup(bot):
     bot.add_cog(games(bot))

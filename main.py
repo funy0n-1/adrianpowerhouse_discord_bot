@@ -1,5 +1,5 @@
 from discord.ext import commands, tasks
-import discord
+import discord as discord
 import os
 import psycopg2, psycopg2.extras
 import urllib
