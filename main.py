@@ -2,8 +2,6 @@ from discord.ext import commands, tasks
 import discord as discord
 import os
 import psycopg2, psycopg2.extras
-import urllib
-import base64
 
 db_pass = os.environ.get('powerbot_db_pass')
 
