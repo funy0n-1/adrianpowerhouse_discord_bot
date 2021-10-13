@@ -65,9 +65,11 @@ class games(commands.Cog):
             except:
                 pass
             if message is not None:
-                if message.author is not self.bot.user: ################################################
+                if message.author is not self.bot.user and message.author not in players: ################################################
                     if len(players) < 2:
                         players.append(message.author)
+                elif message.author in players:
+                    await ctx.send("You're already in game.")
             if len(players) > 1:
                 break
         if len(players) > 1:
